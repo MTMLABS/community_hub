@@ -1,0 +1,114 @@
+// schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  userId    Int      @id @default(autoincrement()) @map("userId")
+  nickname  String   @unique @map("nickname")
+  password  String   @map("password")
+  createdAt DateTime @default(now()) @map("createdAt")
+  updatedAt DateTime @updatedAt @map("updatedAt")
+
+  UserInfos UserInfos? // 사용자(Users) 테이블과 사용자 정보(UserInfos) 테이블이 1:1 관계를 맺습니다.
+  Posts     Posts[] // 사용자(Users) 테이블과 게시글(Posts) 테이블이 1:N 관계를 맺습니다.
+  Comments  Comments[] // 사용자(Users) 테이블과 댓글(Comments) 테이블이 1:N 관계를 맺습니다.
+  UserHistories UserHistories[] 
+
+  @@map("Users")
+}
+
+model UserHistories {
+  userHistoryId String @id @default(uuid()) @map("userHistoryId")
+  UserId Int @map("UserId")
+  changedField String @map("changedField")
+  oldValue String? @map("oldValue")
+  newValue String @map("newValue")
+  changedAt DateTime @default(now()) @map("changedAt")
+
+  User Users @relation(fields:[UserId], references:[userId], onDelete: Cascade)
+
+  @@map("UserHistories")
+}
+
+model UserInfos {
+  userInfoId   Int      @id @default(autoincrement()) @map("userInfoId")
+  UserId       Int      @unique @map("UserId") // 사용자(Users) 테이블을 참조하는 외래키
+  name         String   @map("name")
+  age          Int?     @map("age")
+  gender       String   @map("gender")
+  profileImage String?  @map("profileImage")
+  createdAt    DateTime @default(now()) @map("createdAt")
+  updatedAt    DateTime @updatedAt @map("updatedAt")
+
+  // Users 테이블과 관계를 설정합니다.
+  User Users @relation(fields: [UserId], references: [userId], onDelete: Cascade)
+
+  @@map("UserInfos")
+}
+
+model Posts {
+  postId    Int      @id @default(autoincrement()) @map("postId")
+  UserId    Int      @map("UserId") // 사용자(Users) 테이블을 참조하는 외래키
+  title     String   @map("title")
+  content   String   @map("content") @db.Text
+  createdAt DateTime @default(now()) @map("createdAt")
+  updatedAt DateTime @updatedAt @map("updatedAt")
+
+  User     Users      @relation(fields: [UserId], references: [userId], onDelete: Cascade)
+  Comments Comments[] // 게시글(Posts) 테이블과 댓글(Comments) 테이블이 1:N 관계를 맺습니다.
+  PostHistories PostHistories[]
+
+  @@map("Posts")
+}
+
+model PostHistories {
+  postHistoryId String @id @default(uuid()) @map("postHistoryId")
+  PostId          Int      @map("PostId")
+  changedField    String   @map("changedField")
+  oldValue        String?  @map("oldValue")
+  newValue        String   @map("newValue")
+  changedAt       DateTime @default(now()) @map("changedAt")
+
+  // Posts 테이블과 관계를 설정합니다.
+  Post Posts @relation(fields: [PostId], references: [postId], onDelete: Cascade)
+
+  @@map("PostHistories")
+}
+
+model Comments {
+  commentId Int      @id @default(autoincrement()) @map("commentId")
+  PostId    Int      @map("PostId") // 게시글(Posts) 테이블을 참조하는 외래키
+  UserId    Int      @map("UserId") // 사용자(Users) 테이블을 참조하는 외래키
+  content   String   @map("content")
+  createdAt DateTime @default(now()) @map("createdAt")
+  updatedAt DateTime @updatedAt @map("updatedAt")
+
+  // Posts 테이블과 관계를 설정합니다.
+  Post Posts @relation(fields: [PostId], references: [postId], onDelete: Cascade)
+  // Users 테이블과 관계를 설정합니다.
+  User Users @relation(fields: [UserId], references: [userId], onDelete: Cascade)
+  CommentHistories  CommentHistories[]
+
+  @@map("Comments")
+}
+
+model CommentHistories {
+  commentHistoryId String @id @default(uuid()) @map("commentHistoryId")
+  CommentId          Int      @map("CommentId")
+  changedField    String   @map("changedField")
+  oldValue        String?  @map("oldValue")
+  newValue        String   @map("newValue")
+  changedAt       DateTime @default(now()) @map("changedAt")
+
+  // Comments 테이블과 관계를 설정합니다.
+  Comment Comments @relation(fields: [CommentId], references: [commentId], onDelete: Cascade)
+
+  @@map("CommentHistories")
+}
