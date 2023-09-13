@@ -20,6 +20,7 @@ model Users {
   Posts     Posts[] // 사용자(Users) 테이블과 게시글(Posts) 테이블이 1:N 관계를 맺습니다.
   Comments  Comments[] // 사용자(Users) 테이블과 댓글(Comments) 테이블이 1:N 관계를 맺습니다.
   UserHistories UserHistories[] 
+  Likes Likes[]
 
   @@map("Users")
 }
@@ -60,10 +61,12 @@ model Posts {
   content   String   @map("content") @db.Text
   createdAt DateTime @default(now()) @map("createdAt")
   updatedAt DateTime @updatedAt @map("updatedAt")
+  likeCount Int      @default(0)
 
   User     Users      @relation(fields: [UserId], references: [userId], onDelete: Cascade)
   Comments Comments[] // 게시글(Posts) 테이블과 댓글(Comments) 테이블이 1:N 관계를 맺습니다.
   PostHistories PostHistories[]
+  Likes Likes[]
 
   @@map("Posts")
 }
@@ -111,4 +114,16 @@ model CommentHistories {
   Comment Comments @relation(fields: [CommentId], references: [commentId], onDelete: Cascade)
 
   @@map("CommentHistories")
+}
+
+model Likes {
+  likeId    Int      @id @default(autoincrement()) @map("likeId")
+  UserId    Int      @map("UserId") 
+  PostId    Int      @map("PostId") 
+  createdAt DateTime @default(now()) @map("createdAt")
+
+  User  Users  @relation(fields: [UserId], references: [userId], onDelete: Cascade)
+  Post  Posts  @relation(fields: [PostId], references: [postId], onDelete: Cascade)
+
+  @@map("Likes")
 }

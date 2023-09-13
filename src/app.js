@@ -10,6 +10,7 @@ import logMiddleware from "./middlewares/log.middleware.js";
 import errorHandlingMiddleware from "./middlewares/error-handling.middleware.js";
 import PostsRouter from "./routes/posts.router.js ";
 import CommentsRouter from "./routes/comments.router.js";
+import LikesRouter from "./routes/likes.router.js";
 
 dotEnv.config();
 
@@ -41,7 +42,7 @@ app.use(
     },
   })
 );
-app.use("/api", [UsersRouter, PostsRouter, CommentsRouter]);
+app.use("/api", [UsersRouter, PostsRouter, CommentsRouter, LikesRouter]);
 app.use(errorHandlingMiddleware);
 
 app.listen(PORT, () => {

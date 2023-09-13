@@ -22,6 +22,7 @@ router.post("/posts", authMiddleware, async (req, res, next) => {
 
 // (2) 게시글 목록 조회 API
 router.get("/posts", async (req, res, next) => {
+  const { postId } = req.params;
   try {
     const posts = await prisma.posts.findMany({
       select: {
@@ -30,6 +31,7 @@ router.get("/posts", async (req, res, next) => {
         title: true,
         createdAt: true,
         updatedAt: true,
+        likeCount: true,
         User: {
           select: {
             nickname: true,
@@ -58,6 +60,7 @@ router.get("/posts/:postId", async (req, res, next) => {
       content: true,
       createdAt: true,
       updatedAt: true,
+      likeCount: true,
       User: {
         select: {
           nickname: true,
@@ -83,7 +86,7 @@ router.patch("/posts/:postId", authMiddleware, async (req, res, next) => {
     return res.status(404).json({ message: "게시글을 찾을 수 없습니다." });
   }
 
-  if ( postInfo.UserId !== userId) {
+  if (postInfo.UserId !== userId) {
     return res
       .status(404)
       .json({ message: "게시글을 수정할 권한이 없습니다." });
@@ -138,7 +141,7 @@ router.delete("/posts/:postId", authMiddleware, async (req, res, next) => {
     return res.status(404).json({ message: "게시글을 찾을 수 없습니다. " });
   }
 
-  if ( post.UserId !== userId) {
+  if (post.UserId !== userId) {
     return res
       .status(404)
       .json({ message: "게시글을 삭제할 권한이 없습니다. " });
